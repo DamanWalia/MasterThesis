@@ -1,0 +1,53 @@
+version: '3.7'
+
+volumes:
+  postgres_data:
+      driver: local
+  keycloak_data:
+      driver: local
+
+services:
+  postgres:
+      container_name: DB
+      image: postgres
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+      environment:
+        POSTGRES_DB: keycloak
+        POSTGRES_USER: keycloak
+        POSTGRES_PASSWORD: password
+  keycloak:
+      container_name: IAM
+      image: quay.io/keycloak/keycloak:18.0.2
+      command: start-dev
+      # restart: unless-stopped
+      # volumes:
+      #    - keycloak_data:/opt/keycloak
+      #    - ./nbp-theme:/opt/keycloak/themes/nbp-theme
+      #   #  - ./raincatcher-keycloak-theme:/opt/jboss/keycloak/themes/raincatcher-theme
+      environment:
+        KC_DB: postgres
+        KC_DB_URL_HOST: postgres
+        KC_DB_URL_PORT: 5432
+        KC_DB_URL_DATABASE: keycloak
+        KC_DB_PASSWORD: password
+        KC_DB_USERNAME: keycloak
+        KC_DB_SCHEMA: public
+        KC_HOSTNAME: localhost
+
+        # DB_VENDOR: POSTGRES
+        # DB_ADDR: postgres
+        # DB_DATABASE: keycloak
+        # DB_USER: keycloak
+        # DB_PORT: 5432
+        #DB_SCHEMA: public
+        DB_PASSWORD: password
+        KC_HOSTNAME: localhost
+        KEYCLOAK_ADMIN: admin
+        KEYCLOAK_ADMIN_PASSWORD: test
+        # Uncomment the line below if you want to specify JDBC parameters. The parameter below is just an example, and it shouldn't be used in production without knowledge. It is highly recommended that you read the PostgreSQL JDBC driver documentation in order to use it.
+        #JDBC_PARAMS: "ssl=true"
+      ports:
+        - 8004:8080
+      depends_on:
+        - postgres
